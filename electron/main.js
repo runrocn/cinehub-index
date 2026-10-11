@@ -29,7 +29,12 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // 强制直连，不继承系统代理：
+  // 资源站 API 和播放 CDN 直连最稳（配合 disable-http2），
+  // 走系统代理反而会把国内请求绕到国外节点导致 Failed to fetch
+  await session.defaultSession.setProxy({ proxyRules: 'direct://' })
+
   // 统一放行 CORS：所有响应补 Access-Control-Allow-Origin:*
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const headers = details.responseHeaders || {}
