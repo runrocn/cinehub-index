@@ -20,8 +20,17 @@ const SOURCES = [
     id: 'yyzy',
     name: '高清m3u8（yyzy）',
     api: 'https://api.yyzy-tv.vip/inc/api_mac10.php'
+  },
+  {
+    id: 'lz',
+    name: '量子m3u8（lz）',
+    api: 'https://cj.lziapi.com/api.php/provide/vod/from/lzm3u8/'
+  },
+  {
+    id: 'wsy',
+    name: 'wsym3u8（wsy）',
+    api: 'https://api.wsyzy.net/api.php/provide/vod/from/wsym3u8/'
   }
-  // 后续加新源，直接往这里 push，结构相同
 ]
 
 // 屏蔽的色情/擦边分类（与客户端一致）

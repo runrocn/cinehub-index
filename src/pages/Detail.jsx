@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Player from '../components/Player.jsx'
 import { useSource } from '../api/context.jsx'
+import { SOURCES as allSources } from '../api/index.js'
+import { saveSourceId } from '../api/index.js'
 import { toggleFav, isFav, getProgress, saveProgress, pushHistory } from '../store.js'
 
 export default function Detail() {
   const { id } = useParams()
-  const { source: src } = useSource()
+  const { source: src, sourceId, setSourceId: ctxSetSource } = useSource()
 
   const [detail, setDetail] = useState(null)
   const [fromIdx, setFromIdx] = useState(0)
@@ -14,9 +16,12 @@ export default function Detail() {
   const [startAt, setStartAt] = useState(0)
   const [faved, setFaved] = useState(false)
   const [error, setError] = useState('')
+  const [switchMsg, setSwitchMsg] = useState('')
+  const [switching, setSwitching] = useState(false)
 
   useEffect(() => {
     setError('')
+    setSwitchMsg('')
     setDetail(null)
     setFromIdx(0)
     setEpIdx(0)
@@ -54,6 +59,30 @@ export default function Detail() {
       year: detail.year, score: detail.score
     })
     setFaved(now)
+  }
+
+  // 切换源：按当前片名在新源搜索，取第一个匹配结果
+  const switchTo = async (newSourceId) => {
+    if (!detail || newSourceId === sourceId) return
+    setSwitching(true)
+    setSwitchMsg('')
+    try {
+      const target = allSources.find(s => s.meta.id === newSourceId)
+      if (!target) return
+      const list = await target.search(detail.name, 1)
+      if (!list || list.length === 0) {
+        setSwitchMsg(`在 ${target.meta.name} 未找到《${detail.name}》`)
+        return
+      }
+      const matched = list[0]
+      saveSourceId(newSourceId)
+      ctxSetSource(newSourceId)
+      window.location.hash = `#/detail/${matched.id}`
+    } catch (e) {
+      setSwitchMsg('切换失败：' + (e.message || ''))
+    } finally {
+      setSwitching(false)
+    }
   }
 
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>
@@ -108,6 +137,26 @@ export default function Detail() {
             <p className="text-sm text-neutral-700 mt-4 leading-relaxed line-clamp-4">{detail.content}</p>
           )}
         </div>
+      </div>
+
+      {/* 源切换 */}
+      <div className="mt-4 flex items-center gap-2 flex-wrap">
+        <span className="text-sm text-neutral-600">资源源：</span>
+        {allSources.map(s => (
+          <button
+            key={s.meta.id}
+            onClick={() => switchTo(s.meta.id)}
+            disabled={switching || s.meta.id === sourceId}
+            className={`px-3 py-1.5 text-sm rounded ${
+              s.meta.id === sourceId
+                ? 'bg-rose-600 text-white'
+                : 'bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+            } ${switching ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {s.meta.name}
+          </button>
+        ))}
+        {switchMsg && <span className="text-sm text-amber-600 ml-2">{switchMsg}</span>}
       </div>
 
       {detail.froms.length > 1 && (

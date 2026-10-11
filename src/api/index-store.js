@@ -5,7 +5,7 @@
 //   2. 调用 loadIndex() 拉取（带 localStorage 缓存）
 //   3. 用 findVodId(slug, sourceId) 查当前源下的 vodId
 
-const INDEX_URL = '' // 例如：'https://cdn.jsdelivr.net/gh/你的用户名/cinehub-index@main/data/index.json'
+const INDEX_URL = 'https://cdn.jsdelivr.net/gh/runrocn/cinehub-index@main/data/index.json'
 const CACHE_KEY = 'cinehub:index:v1'
 const CACHE_TTL = 12 * 60 * 60 * 1000 // 12 小时
 
