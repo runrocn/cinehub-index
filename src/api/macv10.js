@@ -33,9 +33,22 @@ export class MacV10Source extends ResourceSource {
     for (const [k, v] of Object.entries(params)) {
       if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v)
     }
-    const res = await fetch(url.toString(), { headers: { 'User-Agent': 'CineHub/1.0' } })
+    const res = await fetch(url.toString(), {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/html, */*',
+        'Referer': new URL(this.meta.api).origin + '/'
+      }
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    return res.json()
+    const text = await res.text()
+    try {
+      return JSON.parse(text)
+    } catch {
+      // 某些源（如 wsy）在不支持搜索时返回纯文本
+      const trimmed = text.slice(0, 100)
+      throw new Error(trimmed.includes('暂不支持') ? '该源暂不支持搜索' : '接口返回非 JSON: ' + trimmed)
+    }
   }
 
   async categories() {

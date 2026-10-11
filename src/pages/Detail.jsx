@@ -69,7 +69,8 @@ export default function Detail() {
     try {
       const target = allSources.find(s => s.meta.id === newSourceId)
       if (!target) return
-      const list = await target.search(detail.name, 1)
+      const result = await target.list({ keyword: detail.name, page: 1 })
+      const list = result.items || []
       if (!list || list.length === 0) {
         setSwitchMsg(`在 ${target.meta.name} 未找到《${detail.name}》`)
         return
