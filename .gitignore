@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist_electron/
+*.log
+dev.log
+vite.log
+electron.log
+cdn-test.txt
+.DS_Store
